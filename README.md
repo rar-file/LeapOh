@@ -5,16 +5,17 @@
 A calm CLI that compresses your morning into a single command. You run it when you arrive at your terminal, when you `cd` into a project, when you want to see your day. Then it's gone. No background daemon. No perpetual frame.
 
 ```
-   .---.   z   good morning, Cam — Friday · 08:14
-  /     \ Z
-*( -   - )*z   git  main · 3 changed · 2 ahead
-  \  ~  /      gh   2 review requests waiting
-   '---'       wx   14° clear
-   /   \       cal  standup in 26m
-  /__|__\      ◐    day 7 of your streak
-   |   |
-               axo says: "good morning. you've got a busy one."
+   /\     /\        good morning, Cam · Friday · 08:14
+  /  \   /  \
+  \   \_/   /       git    main · 3 changed · 2 ahead
+   |       |        gh     2 review requests
+   |  o o  |        wx     14° clear
+   |   v   |        cal    standup in 26m
+    \  ‿  /         ◐      day 7 of your streak
+     ‾‾‾‾‾          fox · "good morning. you've got a busy one."
 ```
+
+The fox is painted in 24-bit colour — warm orange when working, gold when something just landed, cool blue when it's cold out, dim grey-blue when it's sleeping. The mood lives in the silhouette and the tint; the receipt lives in the four lines beside it.
 
 The pet's mood compresses everything. The four lines next to it spell it out.
 
@@ -58,7 +59,7 @@ Add it to your shell's prompt or `chpwd` hook if you want it on every `cd`. Or j
 `~/.config/leapoh/config.toml` — every key is optional:
 
 ```toml
-creature         = "axolotl"   # built-in name, or a path to a sprite TOML
+creature         = "fox"       # built-in: "fox" or "axolotl"; or path to a sprite TOML
 name             = "Cam"       # how the creature addresses you
 workday_start    = 9
 workday_end      = 18
@@ -69,6 +70,8 @@ observers        = ["git", "github", "weather", "system", "streak"]
 lat = 40.7128
 lon = -74.0060
 ```
+
+Colour is on by default in interactive terminals. Override with `NO_COLOR=1`, `--no-color`, or `LEAPOH_COLOR=always|never|auto`.
 
 ---
 
@@ -93,11 +96,12 @@ Force any pose with `--pose <name>` to preview your sprite set.
 
 ## Forking the creature
 
-Poses are TOML. Anyone can fork the axolotl without recompiling.
+Poses are TOML. Anyone can fork the fox without recompiling. Add an optional `color = [r, g, b]` to colour the whole sprite, or per-pose to shift the tint with the mood.
 
 ```toml
 name         = "duck"
 default_pose = "idle"
+color        = [240, 200, 80]    # base tint
 
 [poses.idle]
 art = '''
@@ -114,6 +118,7 @@ art = '''
    ( ._> /
     `---'
 '''
+color = [120, 130, 160]          # cooler, sleepier
 ```
 
 Drop it in `~/.config/leapoh/creatures/duck.toml`, then set `creature = "duck"` in your config — or pass `--creature ./duck.toml` for one-off use.

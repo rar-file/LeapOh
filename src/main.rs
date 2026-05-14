@@ -4,6 +4,7 @@ mod pose;
 mod render;
 mod sprite;
 mod state;
+mod theme;
 mod voice;
 
 use std::process::ExitCode;
@@ -24,6 +25,15 @@ fn main() -> ExitCode {
 
     let cfg = config::Config::load(args.config.as_deref()).unwrap_or_default();
     let ctx = state::Context::gather(&cfg);
+
+    let color_mode = match std::env::var("LEAPOH_COLOR").as_deref() {
+        Ok("always") => theme::ColorMode::Always,
+        Ok("never") => theme::ColorMode::Never,
+        _ if args.no_color => theme::ColorMode::Never,
+        _ => theme::ColorMode::Auto,
+    };
+    let active_theme = theme::Theme::new(color_mode.resolve());
+
     let mut signals = state::Signals::default();
     let mut observations = Vec::new();
 
@@ -56,18 +66,19 @@ fn main() -> ExitCode {
         .get(&pose_name)
         .or_else(|| sprite.poses.get(&sprite.default_pose))
         .cloned()
-        .unwrap_or_else(sprite::fallback_art);
+        .unwrap_or_else(|| sprite::Pose {
+            art: "?".into(),
+            color: None,
+        });
 
-    let voice_line = voice::synthesize(&ctx, &signals, &pose_name, &cfg);
+    let voice_line = voice::synthesize(&ctx, &signals, &pose_name, &cfg, &sprite);
 
-    // Sort observations by priority desc, keep top N
     observations.sort_by(|a, b| b.priority.cmp(&a.priority));
     observations.truncate(cfg.max_observations as usize);
 
-    let output = render::render(&ctx, &art, &observations, &voice_line, &cfg);
+    let output = render::render(&ctx, &sprite, &art, &observations, &voice_line, &cfg, &active_theme);
     print!("{output}");
 
-    // Record this invocation for streak tracking
     observers::streak::record_invocation(&ctx);
 
     ExitCode::SUCCESS

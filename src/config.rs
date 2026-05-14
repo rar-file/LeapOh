@@ -7,13 +7,17 @@ Usage:
   leapoh [options]
 
 Options:
-  --creature <name|path>   Pick a creature (default from config, or 'axolotl')
+  --creature <name|path>   Pick a creature (default 'fox'; built-in: fox, axolotl)
   --pose <name>            Force a specific pose (for debugging sprites)
   --config <path>          Path to config file (default ~/.config/leapoh/config.toml)
-  --no-color               Suppress color output (color is off by default for now)
+  --no-color               Suppress 24-bit color output
   -h, --help               Show this help
 
-Built-in poses: working, sleeping, excited, concerned, sick, shivering, adorned, idle
+Environment:
+  LEAPOH_COLOR=always|never|auto   Override color detection (default: auto)
+  NO_COLOR=1                       Honored when color mode is auto
+
+Built-in poses: idle, working, sleeping, excited, concerned, sick, shivering, adorned
 ";
 
 #[derive(Debug, Default)]
@@ -77,7 +81,7 @@ pub struct Location {
 }
 
 fn default_creature() -> String {
-    "axolotl".into()
+    "fox".into()
 }
 fn default_max_obs() -> u8 {
     5

@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::sprite::Sprite;
 use crate::state::{Context, Signals};
 
 fn capitalize(s: &str) -> String {
@@ -9,7 +10,7 @@ fn capitalize(s: &str) -> String {
     }
 }
 
-pub fn synthesize(ctx: &Context, sig: &Signals, pose: &str, cfg: &Config) -> String {
+pub fn synthesize(ctx: &Context, sig: &Signals, pose: &str, cfg: &Config, _sprite: &Sprite) -> String {
     let name_owned;
     let name: &str = match cfg.name.as_deref() {
         Some(n) => n,

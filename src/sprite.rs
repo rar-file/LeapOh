@@ -1,8 +1,10 @@
 use crate::config::Config;
+use crate::theme::Color;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::path::Path;
 
+const EMBEDDED_FOX: &str = include_str!("assets/fox.toml");
 const EMBEDDED_AXOLOTL: &str = include_str!("assets/axolotl.toml");
 
 #[derive(Debug, Deserialize, Clone)]
@@ -10,12 +12,16 @@ pub struct Sprite {
     pub name: String,
     #[serde(default = "default_default_pose")]
     pub default_pose: String,
+    #[serde(default)]
+    pub color: Option<Color>,
     pub poses: BTreeMap<String, Pose>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Pose {
     pub art: String,
+    #[serde(default)]
+    pub color: Option<Color>,
 }
 
 fn default_default_pose() -> String {
@@ -27,17 +33,14 @@ pub fn load(cfg: &Config, cli_override: Option<&str>) -> Sprite {
     if let Some(sp) = try_load(pick) {
         return sp;
     }
-    // Fallback: embedded axolotl
-    parse_embedded()
+    parse_embedded(EMBEDDED_FOX)
 }
 
 fn try_load(pick: &str) -> Option<Sprite> {
-    // Path-like? Load from file.
     if pick.contains('/') || pick.ends_with(".toml") {
         let text = std::fs::read_to_string(Path::new(pick)).ok()?;
         return toml::from_str(&text).ok();
     }
-    // Named creature in user dir?
     if let Some(home) = dirs::config_dir() {
         let candidate = home.join(format!("leapoh/creatures/{pick}.toml"));
         if let Ok(text) = std::fs::read_to_string(candidate) {
@@ -46,19 +49,17 @@ fn try_load(pick: &str) -> Option<Sprite> {
             }
         }
     }
-    // Built-in named creature
     match pick {
-        "axolotl" => Some(parse_embedded()),
+        "fox" => Some(parse_embedded(EMBEDDED_FOX)),
+        "axolotl" => Some(parse_embedded(EMBEDDED_AXOLOTL)),
         _ => None,
     }
 }
 
-fn parse_embedded() -> Sprite {
-    toml::from_str(EMBEDDED_AXOLOTL).expect("embedded axolotl sprite must parse")
+fn parse_embedded(text: &str) -> Sprite {
+    toml::from_str(text).expect("embedded sprite must parse")
 }
 
-pub fn fallback_art() -> Pose {
-    Pose {
-        art: "    .---.\n   /     \\\n *( o   o )*\n   \\  _  /\n    '---'\n    /   \\\n   /__|__\\\n    |   |\n".into(),
-    }
+pub fn pose_color(sprite: &Sprite, pose: &Pose) -> Option<Color> {
+    pose.color.or(sprite.color)
 }
